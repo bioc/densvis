@@ -80,12 +80,12 @@ static double evaluateError(double* P, double* Y, int N, int D);
 static double evaluateError(unsigned int* row_P, unsigned int* col_P, double* val_P, double* Y, int N, int D, double theta);
 static double evaluateErrorDens(unsigned int* row_P, unsigned int* col_P, double* val_P, double* Y, int N, int D, double theta, double logdist_shift, double dens_lambda, double var_shift, double* R, double* rhosq, double* re);
 static void computeSquaredEuclideanDistance(double* X, int N, int D, double* DD);
-static void symmetrizeMatrix(unsigned int** row_P, unsigned int** col_P, double** val_P, double** val_D, int N);
+static void symmetrizeMatrix(unsigned int** row_P, unsigned int** col_P, double** val_P, double** val_D, unsigned int N);
 static void computeExpectedLogDist(double** out, unsigned int* _row_P, unsigned int* _col_P, double* _val_P, double* _val_D, int N, double logdist_shift);
 
 
 // Perform t-SNE
-void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, double perplexity, double theta, int rand_seed,
+void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, double perplexity, double theta, 
                bool skip_random_init, int max_iter, int stop_lying_iter, int mom_switch_iter,
                double dens_frac, double dens_lambda, bool final_dens) {
 
@@ -93,7 +93,7 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
     printf("dens_lambda: %f\n", dens_lambda);
     printf("final_dens: %d\n", final_dens);
     printf("skip_init: %d\n", skip_random_init);
-    rand_seed = 0;
+    int rand_seed = 0;
 
     // Set random seed
     if (!skip_random_init) {
@@ -176,8 +176,8 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
         symmetrizeMatrix(&row_P, &col_P, &val_P, &val_D, N);
 
         double sum_P = .0;
-        for(int i = 0; i < row_P[N]; i++) sum_P += val_P[i];
-        for(int i = 0; i < row_P[N]; i++) val_P[i] /= sum_P;
+        for(unsigned int i = 0; i < row_P[N]; i++) sum_P += val_P[i];
+        for(unsigned int i = 0; i < row_P[N]; i++) val_P[i] /= sum_P;
     }
     end = clock();
 
@@ -203,7 +203,7 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
       
       // Lie about the P-values (only for random initialization)
       if(exact) { for(int i = 0; i < N * N; i++)        P[i] *= 12.0; }
-      else {      for(int i = 0; i < row_P[N]; i++) val_P[i] *= 12.0; }
+      else {      for(unsigned int i = 0; i < row_P[N]; i++) val_P[i] *= 12.0; }
 
     }
 
@@ -246,7 +246,7 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
         // Stop lying about the P-values after a while, and switch momentum
         if(!skip_random_init && iter == stop_lying_iter) {
             if(exact) { for(int i = 0; i < N * N; i++)        P[i] /= 12.0; }
-            else      { for(int i = 0; i < row_P[N]; i++) val_P[i] /= 12.0; }
+            else      { for(unsigned int i = 0; i < row_P[N]; i++) val_P[i] /= 12.0; }
         }
         if(iter == mom_switch_iter) momentum = final_momentum;
 
@@ -495,7 +495,7 @@ static double evaluateError(unsigned int* row_P, unsigned int* col_P, double* va
     double C = .0, Q;
     for(int n = 0; n < N; n++) {
         ind1 = n * D;
-        for(int i = row_P[n]; i < row_P[n + 1]; i++) {
+        for(unsigned int i = row_P[n]; i < row_P[n + 1]; i++) {
             Q = .0;
             ind2 = col_P[i] * D;
             for(int d = 0; d < D; d++) buff[d]  = Y[ind1 + d];
@@ -539,7 +539,7 @@ static double evaluateErrorDens(unsigned int* row_P, unsigned int* col_P, double
 
         double rphi_sum = 0.0;
         double phi_sum = 0.0;
-        for(int i = row_P[n]; i < row_P[n + 1]; i++) {
+        for(unsigned int i = row_P[n]; i < row_P[n + 1]; i++) {
             double dist = 0.0;
             ind2 = col_P[i] * D;
             for(int d = 0; d < D; d++) buff[d]  = Y[ind1 + d];
@@ -744,8 +744,8 @@ static void computeGaussianPerplexity(double* X, int N, int D, unsigned int** _r
         }
 
         // Row-normalize current row of P and store in matrix
-        for(unsigned int m = 0; m < K; m++) cur_P[m] /= sum_P;
-        for(unsigned int m = 0; m < K; m++) {
+        for(int m = 0; m < K; m++) cur_P[m] /= sum_P;
+        for(int m = 0; m < K; m++) {
             col_P[row_P[n] + m] = (unsigned int) indices[m + 1].index();
             val_P[row_P[n] + m] = cur_P[m];
             val_D[row_P[n] + m] = distances[m + 1] * distances[m + 1];
@@ -767,7 +767,7 @@ static void computeExpectedLogDist(double** _out, unsigned int* row_P, unsigned 
     for (int n = 0; n < N; n++) {
       double sum_PD = 0;
       double sum_P = 0;
-      for (int i = row_P[n]; i < row_P[n + 1]; i++) {
+      for (unsigned int i = row_P[n]; i < row_P[n + 1]; i++) {
         sum_PD += val_P[i] * val_D[i];
         sum_P += val_P[i];
       }
@@ -776,7 +776,7 @@ static void computeExpectedLogDist(double** _out, unsigned int* row_P, unsigned 
 }
 
 // Symmetrizes a sparse matrix
-static void symmetrizeMatrix(unsigned int** _row_P, unsigned int** _col_P, double** _val_P, double** _val_D, int N) {
+static void symmetrizeMatrix(unsigned int** _row_P, unsigned int** _col_P, double** _val_P, double** _val_D, unsigned int N) {
 
     // Get sparse matrix
     unsigned int* row_P = *_row_P;
@@ -787,12 +787,12 @@ static void symmetrizeMatrix(unsigned int** _row_P, unsigned int** _col_P, doubl
     // Count number of elements and row counts of symmetric matrix
     int* row_counts = (int*) calloc(N, sizeof(int));
     if(row_counts == NULL) { printf("Memory allocation failed!\n"); exit(1); }
-    for(int n = 0; n < N; n++) {
-        for(int i = row_P[n]; i < row_P[n + 1]; i++) {
+    for(unsigned int n = 0; n < N; n++) {
+        for(unsigned int i = row_P[n]; i < row_P[n + 1]; i++) {
 
             // Check whether element (col_P[i], n) is present
             bool present = false;
-            for(int m = row_P[col_P[i]]; m < row_P[col_P[i] + 1]; m++) {
+            for(unsigned int m = row_P[col_P[i]]; m < row_P[col_P[i] + 1]; m++) {
                 if(col_P[m] == n) present = true;
             }
             if(present) row_counts[n]++;
@@ -803,7 +803,7 @@ static void symmetrizeMatrix(unsigned int** _row_P, unsigned int** _col_P, doubl
         }
     }
     int no_elem = 0;
-    for(int n = 0; n < N; n++) no_elem += row_counts[n];
+    for(unsigned int n = 0; n < N; n++) no_elem += row_counts[n];
 
     // Allocate memory for symmetrized matrix
     unsigned int* sym_row_P = (unsigned int*) malloc((N + 1) * sizeof(unsigned int));
@@ -814,12 +814,12 @@ static void symmetrizeMatrix(unsigned int** _row_P, unsigned int** _col_P, doubl
 
     // Construct new row indices for symmetric matrix
     sym_row_P[0] = 0;
-    for(int n = 0; n < N; n++) sym_row_P[n + 1] = sym_row_P[n] + (unsigned int) row_counts[n];
+    for(unsigned int n = 0; n < N; n++) sym_row_P[n + 1] = sym_row_P[n] + (unsigned int) row_counts[n];
 
     // Fill the result matrix
     int* offset = (int*) calloc(N, sizeof(int));
     if(offset == NULL) { printf("Memory allocation failed!\n"); exit(1); }
-    for(int n = 0; n < N; n++) {
+    for(unsigned int n = 0; n < N; n++) {
         for(unsigned int i = row_P[n]; i < row_P[n + 1]; i++) {                                  // considering element(n, col_P[i])
 
             // Check whether element (col_P[i], n) is present
