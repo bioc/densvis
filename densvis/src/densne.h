@@ -62,9 +62,7 @@ extern "C" {
     namespace DENSNE {
         #endif
             void run(double* X, int N, int D, double* Y, double* dens, int no_dims, double perplexity, double theta,
-                     bool skip_random_init, int max_iter, int stop_lying_iter, int mom_switch_iter, double dens_frac, double dens_lambda, bool final_dens);
-            bool load_data(double** data, int* n, int* d, int* no_dims, double* theta, double* perplexity, int* rand_seed, int* max_iter, double* dens_frac, double* dens_lambda, bool* final_dens, double** Y_init);
-            void save_data(double* data, double* dens, int* landmarks, double* costs, int n, int d);
+                     bool skip_random_init, int max_iter, int stop_lying_iter, int mom_switch_iter, double dens_frac, double dens_lambda, bool final_dens, bool verbose);
         #ifdef __cplusplus
     }
 }

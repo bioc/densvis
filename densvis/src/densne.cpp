@@ -62,6 +62,7 @@
 #include "vptree.h"
 #include "sptree.h"
 #include "densne.h"
+#include <Rcpp.h>
 
 
 using namespace std;
@@ -70,8 +71,8 @@ static double sign(double x) { return (x == .0 ? .0 : (x < .0 ? -1.0 : 1.0)); }
 
 static void zeroMean(double* X, int N, int D);
 static void standardize(double* x, int N);
-static void computeGaussianPerplexity(double* X, int N, int D, double* P, double perplexity);
-static void computeGaussianPerplexity(double* X, int N, int D, unsigned int** _row_P, unsigned int** _col_P, double** _val_P, double** _val_D, double perplexity, int K);
+static void computeGaussianPerplexity(double* X, int N, int D, double* P, double perplexity, bool verbose);
+static void computeGaussianPerplexity(double* X, int N, int D, unsigned int** _row_P, unsigned int** _col_P, double** _val_P, double** _val_D, double perplexity, int K, bool verbose);
 static double randn();
 static void computeExactGradient(double* P, double* Y, int N, int D, double* dC);
 static void computeGradient(unsigned int* inp_row_P, unsigned int* inp_col_P, double* inp_val_P, double* Y, int N, int D, double* dC, double theta);
@@ -85,33 +86,27 @@ static void computeExpectedLogDist(double** out, unsigned int* _row_P, unsigned 
 
 
 // Perform t-SNE
-void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, double perplexity, double theta, 
-               bool skip_random_init, int max_iter, int stop_lying_iter, int mom_switch_iter,
-               double dens_frac, double dens_lambda, bool final_dens) {
+void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
+        double perplexity, double theta, bool skip_random_init, int max_iter,
+        int stop_lying_iter, int mom_switch_iter, double dens_frac, 
+        double dens_lambda, bool final_dens, bool verbose) {
 
-    printf("dens_frac: %f\n", dens_frac);
-    printf("dens_lambda: %f\n", dens_lambda);
-    printf("final_dens: %d\n", final_dens);
-    printf("skip_init: %d\n", skip_random_init);
-    int rand_seed = 0;
-
-    // Set random seed
-    if (!skip_random_init) {
-      if(rand_seed >= 0) {
-          printf("Using random seed: %d\n", rand_seed);
-          srand((unsigned int) rand_seed);
-      } else {
-          printf("Using current time as random seed...\n");
-          srand(time(NULL));
-      }
+    if (verbose) {
+        Rprintf("dens_frac: %f\n", dens_frac);
+        Rprintf("dens_lambda: %f\n", dens_lambda);
+        Rprintf("final_dens: %d\n", final_dens);
     }
 
     // Determine whether we are using an exact algorithm
-    if(N - 1 < 3 * perplexity) { printf("Perplexity too large for the number of data points!\n"); exit(1); }
-    printf("Using no_dims = %d, perplexity = %f, and theta = %f\n", no_dims, perplexity, theta);
+    if(N - 1 < 3 * perplexity) { 
+        Rcpp::stop("Perplexity too large for the number of data points!\n");
+    }
+    if (verbose) {
+        Rprintf("Using no_dims = %d, perplexity = %f, and theta = %f\n", no_dims, perplexity, theta);
+    }
     bool exact = (theta == .0) ? true : false;
 
-    if (exact) { printf("den-SNE based on exact t-SNE is currently unsupported\n"); exit(1); }
+    if (exact) { Rcpp::stop("den-SNE based on exact t-SNE is currently unsupported\n"); }
 
     // Set learning parameters
     float total_time = .0;
@@ -125,12 +120,14 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
     double* dY    = (double*) malloc(N * no_dims * sizeof(double));
     double* uY    = (double*) malloc(N * no_dims * sizeof(double));
     double* gains = (double*) malloc(N * no_dims * sizeof(double));
-    if(dY == NULL || uY == NULL || gains == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(dY == NULL || uY == NULL || gains == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     for(int i = 0; i < N * no_dims; i++)    uY[i] =  .0;
     for(int i = 0; i < N * no_dims; i++) gains[i] = 1.0;
 
     // Normalize input data (to prevent numerical problems)
-    printf("Computing input similarities...\n");
+    if (verbose) {
+        Rprintf("Computing input similarities...\n");
+    }
     start = clock();
     zeroMean(X, N, D);
     double max_X = .0;
@@ -144,13 +141,17 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
     if(exact) {
 
         // Compute similarities
-        printf("Exact?");
+        if (verbose) {
+            Rprintf("Exact?");
+        }
         P = (double*) malloc(N * N * sizeof(double));
-        if(P == NULL) { printf("Memory allocation failed!\n"); exit(1); }
-        computeGaussianPerplexity(X, N, D, P, perplexity);
+        if(P == NULL) { Rcpp::stop("Memory allocation failed!\n");}
+        computeGaussianPerplexity(X, N, D, P, perplexity, verbose);
 
         // Symmetrize input similarities
-        printf("Symmetrizing...\n");
+        if (verbose) {
+            Rprintf("Symmetrizing...\n");
+        }
         int nN = 0;
         for(int n = 0; n < N; n++) {
             int mN = (n + 1) * N;
@@ -170,7 +171,7 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
     else {
 
         // Compute asymmetric pairwise input similarities
-        computeGaussianPerplexity(X, N, D, &row_P, &col_P, &val_P, &val_D, perplexity, (int) (3 * perplexity));
+        computeGaussianPerplexity(X, N, D, &row_P, &col_P, &val_P, &val_D, perplexity, (int) (3 * perplexity), verbose);
 
         // Symmetrize input similarities
         symmetrizeMatrix(&row_P, &col_P, &val_P, &val_D, N);
@@ -208,12 +209,17 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
     }
 
     // Perform main training loop
-    if(exact) printf("Input similarities computed in %4.2f seconds!\nLearning embedding...\n", (float) (end - start) / CLOCKS_PER_SEC);
-    else printf("Input similarities computed in %4.2f seconds (sparsity = %f)!\nLearning embedding...\n", (float) (end - start) / CLOCKS_PER_SEC, (double) row_P[N] / ((double) N * (double) N));
+    if (verbose) {
+        if(exact) {
+            Rprintf("Input similarities computed in %4.2f seconds!\nLearning embedding...\n", (float) (end - start) / CLOCKS_PER_SEC);
+        } else {
+            Rprintf("Input similarities computed in %4.2f seconds (sparsity = %f)!\nLearning embedding...\n", (float) (end - start) / CLOCKS_PER_SEC, (double) row_P[N] / ((double) N * (double) N));
+        }
+    }
     start = clock();
 
     double* re = (double*) calloc(N, sizeof(double));
-    if (re == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if (re == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
 
     bool dens_flag = false;
     for(int iter = 1; iter <= max_iter; iter++) {
@@ -225,7 +231,9 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
           computeGradient(row_P, col_P, val_P, Y, N, no_dims, dY, theta);
         } else {
           if (!dens_flag) {
-            printf("Iteration %d: density optimization switched on\n", iter);
+            if (verbose) {
+              Rprintf("Iteration %d: density optimization switched on\n", iter);
+            }
             dens_flag = true;
           }
           computeGradientDens(row_P, col_P, val_P, Y, N, no_dims, dY, theta,
@@ -269,14 +277,15 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
             float elapsed_time = (float) (end - start) / CLOCKS_PER_SEC;
             total_time += elapsed_time;
 
-            if (dens_flag) {
-              printf("Iteration %d: error is %f, rho = %f", iter, C, rho);
-            } else {
-              printf("Iteration %d: error is %f", iter, C);
+            if (verbose) {
+              if (dens_flag) {
+                Rprintf("Iteration %d: error is %f, rho = %f", iter, C, rho);
+              } else {
+                Rprintf("Iteration %d: error is %f", iter, C);
+              }
+              Rprintf(" (50 iterations in %4.2f seconds)\n", elapsed_time);
             }
-            printf(" (50 iterations in %4.2f seconds)\n", elapsed_time);
-
-                  start = clock();
+            start = clock();
         }
     }
 
@@ -294,7 +303,9 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
     }
     free(ro);
 
-    printf("Fitting performed in %4.2f seconds.\n", total_time);
+    if (verbose) {
+      Rprintf("Fitting performed in %4.2f seconds.\n", total_time);
+    }
 
     if (re != NULL) {
       free(re); re = NULL;
@@ -302,9 +313,11 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
 
     // Compute embedding density
     if (final_dens) {
-        printf("Computing embedding local densities\n");
+        if (verbose) {
+          Rprintf("Computing embedding local densities\n");
+        }
 
-        computeGaussianPerplexity(Y, N, 2, &row_P, &col_P, &val_P, &val_D, perplexity, (int) (3 * perplexity));
+        computeGaussianPerplexity(Y, N, 2, &row_P, &col_P, &val_P, &val_D, perplexity, (int) (3 * perplexity), verbose);
         symmetrizeMatrix(&row_P, &col_P, &val_P, &val_D, N);
 
         // Compute expected log distance for each point
@@ -336,7 +349,7 @@ static void computeGradient(unsigned int* inp_row_P, unsigned int* inp_col_P, do
     double sum_Q = .0;
     double* pos_f = (double*) calloc(N * D, sizeof(double));
     double* neg_f = (double*) calloc(N * D, sizeof(double));
-    if(pos_f == NULL || neg_f == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(pos_f == NULL || neg_f == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     tree->computeEdgeForces(inp_row_P, inp_col_P, inp_val_P, N, pos_f, NULL, NULL, 0);
     for(int n = 0; n < N; n++) tree->computeNonEdgeForces(n, theta, neg_f + n * D, &sum_Q);
     
@@ -367,7 +380,7 @@ static void computeGradientDens(unsigned int* inp_row_P, unsigned int* inp_col_P
     double* q_norm = (double*) calloc(N, sizeof(double)); // normalization factors
 
     if (pos_f == NULL || neg_f == NULL || dens_f == NULL || re == NULL || q_norm == NULL) {
-      printf("Memory allocation failed!\n"); exit(1);
+      Rcpp::stop("Memory allocation failed!\n"); 
     }
 
     tree->computeEdgeForces(inp_row_P, inp_col_P, inp_val_P, N, pos_f,
@@ -402,12 +415,12 @@ static void computeExactGradient(double* P, double* Y, int N, int D, double* dC)
 
     // Compute the squared Euclidean distance matrix
     double* DD = (double*) malloc(N * N * sizeof(double));
-    if(DD == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(DD == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     computeSquaredEuclideanDistance(Y, N, D, DD);
 
     // Compute Q-matrix and normalization sum
     double* Q    = (double*) malloc(N * N * sizeof(double));
-    if(Q == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(Q == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     double sum_Q = .0;
     int nN = 0;
     for(int n = 0; n < N; n++) {
@@ -450,7 +463,7 @@ static double evaluateError(double* P, double* Y, int N, int D) {
     // Compute the squared Euclidean distance matrix
     double* DD = (double*) malloc(N * N * sizeof(double));
     double* Q = (double*) malloc(N * N * sizeof(double));
-    if(DD == NULL || Q == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(DD == NULL || Q == NULL) { Rcpp::stop("Memory allocation failed!\n");  }
     computeSquaredEuclideanDistance(Y, N, D, DD);
 
     // Compute Q-matrix and normalization sum
@@ -526,7 +539,7 @@ static double evaluateErrorDens(unsigned int* row_P, unsigned int* col_P, double
 
     double* buff = (double*) calloc(D, sizeof(double));
 
-    if(re == NULL || buff == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(re == NULL || buff == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
 
     double sum_Q = .0;
     for(int n = 0; n < N; n++) tree->computeNonEdgeForces(n, theta, buff, &sum_Q);
@@ -587,11 +600,11 @@ static double evaluateErrorDens(unsigned int* row_P, unsigned int* col_P, double
 }
 
 // Compute input similarities with a fixed perplexity
-static void computeGaussianPerplexity(double* X, int N, int D, double* P, double perplexity) {
+static void computeGaussianPerplexity(double* X, int N, int D, double* P, double perplexity, bool verbose) {
 
     // Compute the squared Euclidean distance matrix
     double* DD = (double*) malloc(N * N * sizeof(double));
-    if(DD == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(DD == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     computeSquaredEuclideanDistance(X, N, D, DD);
 
     // Compute the Gaussian kernel row by row
@@ -658,22 +671,22 @@ static void computeGaussianPerplexity(double* X, int N, int D, double* P, double
 
 
 // Compute input similarities with a fixed perplexity using ball trees (this function allocates memory another function should free)
-static void computeGaussianPerplexity(double* X, int N, int D, unsigned int** _row_P, unsigned int** _col_P, double** _val_P, double** _val_D, double perplexity, int K) {
+static void computeGaussianPerplexity(double* X, int N, int D, unsigned int** _row_P, unsigned int** _col_P, double** _val_P, double** _val_D, double perplexity, int K, bool verbose) {
 
-    if(perplexity > K) printf("Perplexity should be lower than K!\n");
+    if(perplexity > K) Rprintf("Perplexity should be lower than K!\n");
 
     // Allocate the memory we need
     *_row_P = (unsigned int*)    malloc((N + 1) * sizeof(unsigned int));
     *_col_P = (unsigned int*)    calloc(N * K, sizeof(unsigned int));
     *_val_P = (double*) calloc(N * K, sizeof(double));
     *_val_D = (double*) calloc(N * K, sizeof(double));
-    if(*_row_P == NULL || *_col_P == NULL || *_val_P == NULL || *_val_D == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(*_row_P == NULL || *_col_P == NULL || *_val_P == NULL || *_val_D == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     unsigned int* row_P = *_row_P;
     unsigned int* col_P = *_col_P;
     double* val_P = *_val_P;
     double* val_D = *_val_D;
     double* cur_P = (double*) malloc((N - 1) * sizeof(double));
-    if(cur_P == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(cur_P == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     row_P[0] = 0;
     for(int n = 0; n < N; n++) row_P[n + 1] = row_P[n] + (unsigned int) K;
 
@@ -684,12 +697,16 @@ static void computeGaussianPerplexity(double* X, int N, int D, unsigned int** _r
     tree->create(obj_X);
 
     // Loop over all points to find nearest neighbors
-    printf("Building tree...\n");
+    if (verbose) {
+      Rprintf("Building tree...\n");
+    }
     vector<DataPoint> indices;
     vector<double> distances;
     for(int n = 0; n < N; n++) {
 
-        if(n % 10000 == 0) printf(" - point %d of %d\n", n, N);
+        if (verbose) {
+          if(n % 10000 == 0) Rprintf(" - point %d of %d\n", n, N);
+        }
 
         // Find nearest neighbors
         indices.clear();
@@ -761,7 +778,7 @@ static void computeGaussianPerplexity(double* X, int N, int D, unsigned int** _r
 static void computeExpectedLogDist(double** _out, unsigned int* row_P, unsigned int* col_P, double* val_P, double* val_D, int N, double logdist_shift) {
 
     *_out = (double*) malloc(N * sizeof(double));
-    if (*_out == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if (*_out == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     double* out = *_out;
 
     for (int n = 0; n < N; n++) {
@@ -786,7 +803,7 @@ static void symmetrizeMatrix(unsigned int** _row_P, unsigned int** _col_P, doubl
 
     // Count number of elements and row counts of symmetric matrix
     int* row_counts = (int*) calloc(N, sizeof(int));
-    if(row_counts == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(row_counts == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     for(unsigned int n = 0; n < N; n++) {
         for(unsigned int i = row_P[n]; i < row_P[n + 1]; i++) {
 
@@ -810,7 +827,7 @@ static void symmetrizeMatrix(unsigned int** _row_P, unsigned int** _col_P, doubl
     unsigned int* sym_col_P = (unsigned int*) malloc(no_elem * sizeof(unsigned int));
     double* sym_val_P = (double*) malloc(no_elem * sizeof(double));
     double* sym_val_D = (double*) malloc(no_elem * sizeof(double));
-    if(sym_row_P == NULL || sym_col_P == NULL || sym_val_P == NULL || sym_val_D == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(sym_row_P == NULL || sym_col_P == NULL || sym_val_P == NULL || sym_val_D == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
 
     // Construct new row indices for symmetric matrix
     sym_row_P[0] = 0;
@@ -818,7 +835,7 @@ static void symmetrizeMatrix(unsigned int** _row_P, unsigned int** _col_P, doubl
 
     // Fill the result matrix
     int* offset = (int*) calloc(N, sizeof(int));
-    if(offset == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(offset == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     for(unsigned int n = 0; n < N; n++) {
         for(unsigned int i = row_P[n]; i < row_P[n + 1]; i++) {                                  // considering element(n, col_P[i])
 
@@ -910,7 +927,7 @@ static void zeroMean(double* X, int N, int D) {
 
     // Compute data mean
     double* mean = (double*) calloc(D, sizeof(double));
-    if(mean == NULL) { printf("Memory allocation failed!\n"); exit(1); }
+    if(mean == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     int nD = 0;
     for(int n = 0; n < N; n++) {
         for(int d = 0; d < D; d++) {
@@ -946,74 +963,4 @@ static double randn() {
     x *= radius;
     y *= radius;
     return x;
-}
-
-// Function that loads data from a t-SNE file
-// Note: this function does a malloc that should be freed elsewhere
-bool DENSNE::load_data(double** data, int* n, int* d, int* no_dims, double* theta, double* perplexity, int* rand_seed, int* max_iter, double* dens_frac, double* dens_lambda, bool* final_dens, double** Y_init) {
-
-  // Open file, read first 2 integers, allocate memory, and read the data
-  FILE *h;
-  if((h = fopen("data.dat", "r+b")) == NULL) {
-    printf("Error: could not open data file.\n");
-    return false;
-  }
-  fread(n, sizeof(int), 1, h);                                            // number of datapoints
-  fread(d, sizeof(int), 1, h);                                            // original dimensionality
-  fread(theta, sizeof(double), 1, h);                                        // gradient accuracy
-  fread(perplexity, sizeof(double), 1, h);                                // perplexity
-  fread(no_dims, sizeof(int), 1, h);                                      // output dimensionality
-  fread(max_iter, sizeof(int),1,h);                                       // maximum number of iterations
-  
-  // densne
-  fread(dens_frac, sizeof(double),1,h);               // fraction of iters with density objective
-  fread(dens_lambda, sizeof(double),1,h);               // regularization weight for density objective
-  char flag;
-  fread(&flag, sizeof(char),1,h);               // whether to output final densities
-  *final_dens = (flag != 0);
-
-  fread(&flag, sizeof(char),1,h);               // Initial embedding provided
-  bool init_emb_flag = flag != 0;
-
-  *data = (double*) malloc(*d * *n * sizeof(double));
-  if(*data == NULL) { printf("Memory allocation failed!\n"); exit(1); }
-  fread(*data, sizeof(double), *n * *d, h);                               // the data
-  
-  if (init_emb_flag) {
-    *Y_init = (double*) malloc(*no_dims * *n * sizeof(double));
-    if(*Y_init == NULL) { printf("Memory allocation failed!\n"); exit(1); }
-    fread(*Y_init, sizeof(double), *n * *no_dims, h);
-  } else {
-    *Y_init = NULL;
-  }
-
-  if(!feof(h)) fread(rand_seed, sizeof(int), 1, h);                       // random seed
-  fclose(h);
-  printf("Read the %i x %i data matrix successfully!\n", *n, *d);
-  return true;
-}
-
-// Function that saves map to a t-SNE file
-void DENSNE::save_data(double* data, double* dens, int* landmarks, double* costs, int n, int d) {
-
-  // Open file, write first 2 integers and then the data
-  FILE *h;
-  if((h = fopen("result.dat", "w+b")) == NULL) {
-      printf("Error: could not open data file.\n");
-      return;
-  }
-  fwrite(&n, sizeof(int), 1, h);
-  fwrite(&d, sizeof(int), 1, h);
-
-  char flag = (dens == NULL) ? 0 : 1;
-  fwrite(&flag, sizeof(char), 1, h);
-
-  fwrite(data, sizeof(double), n * d, h);
-  if (dens != NULL) {
-    fwrite(dens, sizeof(double), n * 2, h);
-  }
-  fwrite(landmarks, sizeof(int), n, h);
-  fwrite(costs, sizeof(double), n, h);
-  fclose(h);
-  printf("Wrote the %i x %i data matrix successfully!\n", n, d);
 }

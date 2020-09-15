@@ -5,9 +5,9 @@
 
 using namespace Rcpp;
 
-// Rtsne_cpp
-Rcpp::List Rtsne_cpp(NumericMatrix X, int no_dims, double perplexity, double theta, bool verbose, int max_iter, bool distance_precomputed, NumericMatrix Y_in, bool init, int stop_lying_iter, int mom_switch_iter, double momentum, double final_momentum, double eta, double exaggeration_factor, double dens_frac, double dens_lambda, bool final_dens, unsigned int num_threads);
-RcppExport SEXP _densvis_Rtsne_cpp(SEXP XSEXP, SEXP no_dimsSEXP, SEXP perplexitySEXP, SEXP thetaSEXP, SEXP verboseSEXP, SEXP max_iterSEXP, SEXP distance_precomputedSEXP, SEXP Y_inSEXP, SEXP initSEXP, SEXP stop_lying_iterSEXP, SEXP mom_switch_iterSEXP, SEXP momentumSEXP, SEXP final_momentumSEXP, SEXP etaSEXP, SEXP exaggeration_factorSEXP, SEXP dens_fracSEXP, SEXP dens_lambdaSEXP, SEXP final_densSEXP, SEXP num_threadsSEXP) {
+// densne_cpp
+Rcpp::NumericMatrix densne_cpp(NumericMatrix X, int no_dims, double perplexity, double theta, bool verbose, int max_iter, bool distance_precomputed, NumericMatrix Y_in, bool init, int stop_lying_iter, int mom_switch_iter, double momentum, double final_momentum, double eta, double exaggeration_factor, double dens_frac, double dens_lambda, bool final_dens, unsigned int num_threads);
+RcppExport SEXP _densvis_densne_cpp(SEXP XSEXP, SEXP no_dimsSEXP, SEXP perplexitySEXP, SEXP thetaSEXP, SEXP verboseSEXP, SEXP max_iterSEXP, SEXP distance_precomputedSEXP, SEXP Y_inSEXP, SEXP initSEXP, SEXP stop_lying_iterSEXP, SEXP mom_switch_iterSEXP, SEXP momentumSEXP, SEXP final_momentumSEXP, SEXP etaSEXP, SEXP exaggeration_factorSEXP, SEXP dens_fracSEXP, SEXP dens_lambdaSEXP, SEXP final_densSEXP, SEXP num_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -30,13 +30,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type dens_lambda(dens_lambdaSEXP);
     Rcpp::traits::input_parameter< bool >::type final_dens(final_densSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(Rtsne_cpp(X, no_dims, perplexity, theta, verbose, max_iter, distance_precomputed, Y_in, init, stop_lying_iter, mom_switch_iter, momentum, final_momentum, eta, exaggeration_factor, dens_frac, dens_lambda, final_dens, num_threads));
+    rcpp_result_gen = Rcpp::wrap(densne_cpp(X, no_dims, perplexity, theta, verbose, max_iter, distance_precomputed, Y_in, init, stop_lying_iter, mom_switch_iter, momentum, final_momentum, eta, exaggeration_factor, dens_frac, dens_lambda, final_dens, num_threads));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_densvis_Rtsne_cpp", (DL_FUNC) &_densvis_Rtsne_cpp, 19},
+    {"_densvis_densne_cpp", (DL_FUNC) &_densvis_densne_cpp, 19},
     {NULL, NULL, 0}
 };
 
