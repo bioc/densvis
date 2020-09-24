@@ -60,6 +60,7 @@
 #include <string.h>
 #include <cmath>
 #include "sptree.h"
+#include <Rcpp.h>
 
 
 
@@ -503,24 +504,24 @@ void SPTree::computeEdgeForces(unsigned int* row_P, unsigned int* col_P, double*
 void SPTree::print() 
 {
     if(cum_size == 0) {
-        printf("Empty node\n");
+        Rprintf("Empty node\n");
         return;
     }
 
     if(is_leaf) {
-        printf("Leaf node; data = [");
+        Rprintf("Leaf node; data = [");
         for(unsigned int i = 0; i < size; i++) {
             double* point = data + index[i] * dimension;
-            for(unsigned int d = 0; d < dimension; d++) printf("%f, ", point[d]);
-            printf(" (index = %d)", index[i]);
-            if(i < size - 1) printf("\n");
-            else printf("]\n");
+            for(unsigned int d = 0; d < dimension; d++) Rprintf("%f, ", point[d]);
+            Rprintf(" (index = %d)", index[i]);
+            if(i < size - 1) Rprintf("\n");
+            else Rprintf("]\n");
         }        
     }
     else {
-        printf("Intersection node with center-of-mass = [");
-        for(unsigned int d = 0; d < dimension; d++) printf("%f, ", center_of_mass[d]);
-        printf("]; children are:\n");
+        Rprintf("Intersection node with center-of-mass = [");
+        for(unsigned int d = 0; d < dimension; d++) Rprintf("%f, ", center_of_mass[d]);
+        Rprintf("]; children are:\n");
         for(unsigned int i = 0; i < no_children; i++) children[i]->print();
     }
 }

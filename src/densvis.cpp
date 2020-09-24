@@ -10,7 +10,6 @@ Rcpp::NumericMatrix densne_cpp(
     double theta,
     bool verbose,
     int max_iter,
-    bool distance_precomputed,
     NumericMatrix Y_in,
     bool init,
     int stop_lying_iter,
@@ -58,6 +57,9 @@ Rcpp::NumericMatrix densne_cpp(
     theta,
     false,
     max_iter,
+    momentum,
+    final_momentum,
+    eta,
     stop_lying_iter,
     mom_switch_iter,
     dens_frac,
@@ -83,6 +85,11 @@ Rcpp::NumericMatrix densne_cpp(
   // bool final_dens
 
   return Rcpp::NumericMatrix(no_dims, N, Y.data());
+  // todo: make a matrix from dens
+  // Rcpp::List(
+  //   Rcpp::Named("x") = Rcpp::NumericMatrix(no_dims, N, Y.data()),
+  //   Rcpp::Named("dens") = Rcpp::NumericMatrix(no_dims, N, dens)
+  // );
 
   // return Rcpp::List::create(Rcpp::_["Y"]=Rcpp::NumericMatrix(no_dims, N, Y.data()), 
   //         Rcpp::_["costs"]=Rcpp::NumericVector(costs.begin(), costs.end()),

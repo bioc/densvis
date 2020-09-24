@@ -73,7 +73,6 @@ static void zeroMean(double* X, int N, int D);
 static void standardize(double* x, int N);
 static void computeGaussianPerplexity(double* X, int N, int D, double* P, double perplexity, bool verbose);
 static void computeGaussianPerplexity(double* X, int N, int D, unsigned int** _row_P, unsigned int** _col_P, double** _val_P, double** _val_D, double perplexity, int K, bool verbose);
-static double randn();
 static void computeExactGradient(double* P, double* Y, int N, int D, double* dC);
 static void computeGradient(unsigned int* inp_row_P, unsigned int* inp_col_P, double* inp_val_P, double* Y, int N, int D, double* dC, double theta);
 static void computeGradientDens(unsigned int* inp_row_P, unsigned int* inp_col_P, double* inp_val_P, double* Y, int N, int D, double* dC, double theta, double* R, double logdist_shift, double dens_lambda, double var_shift);
@@ -86,8 +85,10 @@ static void computeExpectedLogDist(double** out, unsigned int* _row_P, unsigned 
 
 
 // Perform t-SNE
-void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims, 
+void DENSNE::run(
+        double* X, int N, int D, double* Y, double* dens, int no_dims, 
         double perplexity, double theta, bool skip_random_init, int max_iter,
+        double momentum, double final_momentum, double eta,
         int stop_lying_iter, int mom_switch_iter, double dens_frac, 
         double dens_lambda, bool final_dens, bool verbose) {
 
@@ -111,8 +112,8 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims,
     // Set learning parameters
     float total_time = .0;
     clock_t start, end;
-      double momentum = .5, final_momentum = .8;
-      double eta = 200.0;
+    // double momentum = .5, final_momentum = .8;
+    // double eta = 200.0;
     double logdist_shift = 0;
     double var_shift = 0.1;
 
@@ -200,7 +201,7 @@ void DENSNE::run(double* X, int N, int D, double* Y, double* dens, int no_dims,
     // Initialize solution (randomly)
     if (!skip_random_init) {
 
-      for(int i = 0; i < N * no_dims; i++) Y[i] = randn() * .0001;
+      for(int i = 0; i < N * no_dims; i++) Y[i] = R::rnorm(0, 1) * .0001;
       
       // Lie about the P-values (only for random initialization)
       if(exact) { for(int i = 0; i < N * N; i++)        P[i] *= 12.0; }
@@ -948,19 +949,4 @@ static void zeroMean(double* X, int N, int D) {
         nD += D;
     }
     free(mean); mean = NULL;
-}
-
-
-// Generates a Gaussian random number
-static double randn() {
-    double x, y, radius;
-    do {
-        x = 2 * (rand() / ((double) RAND_MAX + 1)) - 1;
-        y = 2 * (rand() / ((double) RAND_MAX + 1)) - 1;
-        radius = (x * x) + (y * y);
-    } while((radius >= 1.0) || (radius == 0.0));
-    radius = sqrt(-2 * log(radius) / radius);
-    x *= radius;
-    y *= radius;
-    return x;
 }
