@@ -21,13 +21,8 @@ RoxygenNote: 7.1.1
 Suggests: 
     knitr,
     rmarkdown,
-    scRNAseq,
     BiocStyle,
-    scater,
-    scran,
-    scuttle,
     ggplot2,
-    snifter,
     Rtsne,
     testthat
 LinkingTo:
