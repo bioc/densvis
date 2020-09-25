@@ -66,7 +66,7 @@ extern "C" {
                 double perplexity, double theta, bool skip_random_init, int max_iter,
                 double momentum, double final_momentum, double eta,
                 int stop_lying_iter, int mom_switch_iter, double dens_frac,
-                double dens_lambda, bool final_dens, bool verbose);
+                double dens_lambda, bool final_dens, int num_threads, bool verbose);
         #ifdef __cplusplus
     }
 }

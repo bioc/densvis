@@ -65,6 +65,10 @@
 #include <Rcpp.h>
 
 
+#ifdef _OPENMP
+  #include <omp.h>
+#endif
+
 using namespace std;
 
 static double sign(double x) { return (x == .0 ? .0 : (x < .0 ? -1.0 : 1.0)); }
@@ -90,13 +94,22 @@ void DENSNE::run(
         double perplexity, double theta, bool skip_random_init, int max_iter,
         double momentum, double final_momentum, double eta,
         int stop_lying_iter, int mom_switch_iter, double dens_frac, 
-        double dens_lambda, bool final_dens, bool verbose) {
+        double dens_lambda, bool final_dens, int num_threads, bool verbose) {
 
     if (verbose) {
         Rprintf("dens_frac: %f\n", dens_frac);
         Rprintf("dens_lambda: %f\n", dens_lambda);
         Rprintf("final_dens: %d\n", final_dens);
     }
+    #ifdef _OPENMP
+      int threads = num_threads;
+      if (num_threads==0) {
+        threads = omp_get_max_threads();
+      }
+      
+      // Print notice whether OpenMP is used
+      if (verbose) Rprintf("OpenMP is working. %d threads.\n", threads);
+    #endif
 
     // Determine whether we are using an exact algorithm
     if(N - 1 < 3 * perplexity) { 
@@ -224,7 +237,7 @@ void DENSNE::run(
 
     bool dens_flag = false;
     for(int iter = 1; iter <= max_iter; iter++) {
-
+        Rcpp::checkUserInterrupt();
         // Compute (approximate) gradient
         if (exact) {
           computeExactGradient(P, Y, N, no_dims, dY);
@@ -352,7 +365,10 @@ static void computeGradient(unsigned int* inp_row_P, unsigned int* inp_col_P, do
     double* neg_f = (double*) calloc(N * D, sizeof(double));
     if(pos_f == NULL || neg_f == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     tree->computeEdgeForces(inp_row_P, inp_col_P, inp_val_P, N, pos_f, NULL, NULL, 0);
-    for(int n = 0; n < N; n++) tree->computeNonEdgeForces(n, theta, neg_f + n * D, &sum_Q);
+    #pragma omp parallel for schedule(guided)
+    for(int n = 0; n < N; n++) {
+        tree->computeNonEdgeForces(n, theta, neg_f + n * D, &sum_Q);
+    }
     
     // Compute final t-SNE gradient
     for(int i = 0; i < N * D; i++) {
@@ -386,7 +402,7 @@ static void computeGradientDens(unsigned int* inp_row_P, unsigned int* inp_col_P
 
     tree->computeEdgeForces(inp_row_P, inp_col_P, inp_val_P, N, pos_f,
                             re, q_norm, logdist_shift); // re and q_norm updated
-
+    #pragma omp parallel for schedule(guided)
     for (int n = 0; n < N; n++) {
       tree->computeNonEdgeForces(n, theta, neg_f + n * D, &sum_Q);
     }
@@ -610,6 +626,7 @@ static void computeGaussianPerplexity(double* X, int N, int D, double* P, double
 
     // Compute the Gaussian kernel row by row
     int nN = 0;
+    #pragma omp parallel for schedule(guided)
     for(int n = 0; n < N; n++) {
 
         // Initialize some variables

@@ -65,6 +65,7 @@ Rcpp::NumericMatrix densne_cpp(
     dens_frac,
     dens_lambda,
     final_dens,
+    num_threads,
     verbose
   );
 
