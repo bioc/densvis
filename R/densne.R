@@ -27,6 +27,12 @@
 #'  density-preservation term compared to the original t-SNE objective function.
 #' @param num_threads Number of threads to be used for parallelisation.
 #' @return A numeric matrix corresponding to the t-SNE embedding 
+#' @references
+#' Density-Preserving Data Visualization Unveils Dynamic Patterns of Single-Cell 
+#' Transcriptomic Variability
+#' Ashwin Narayan, Bonnie Berger, Hyunghoon Cho;
+#' bioRxiv (2020)
+#' <doi:10.1101/2020.05.12.077776>
 #' @examples 
 #' x <- matrix(rnorm(1e4), nrow = 1000)
 #' d <- densne(x)
