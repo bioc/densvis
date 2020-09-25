@@ -51,6 +51,7 @@ test_that("error conditions", {
 test_that("densne works", {
     x <- matrix(rnorm(1e4), nrow = 1000)
     expect_is(densne(x), "matrix")
+    expect_is(densne(x, num_threads = 8), "matrix")
     Y_init <- prcomp(x)$x[, 1:2]
     expect_is(densne(x, Y_init = Y_init), "matrix")
 })
