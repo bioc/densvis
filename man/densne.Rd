@@ -5,7 +5,7 @@
 \title{Density-preserving t-SNE}
 \usage{
 densne(
-  data,
+  X,
   dims = 2,
   perplexity = 50,
   theta = 0.5,
@@ -24,7 +24,7 @@ densne(
 )
 }
 \arguments{
-\item{data}{Input data matrix.}
+\item{X}{Input data matrix.}
 
 \item{dims}{Integer output dimensionality.}
 
@@ -77,4 +77,11 @@ Density-preserving t-SNE
 x <- matrix(rnorm(1e4), nrow = 1000)
 d <- densne(x)
 plot(d)
+}
+\references{
+Density-Preserving Data Visualization Unveils Dynamic Patterns of Single-Cell
+Transcriptomic Variability
+Ashwin Narayan, Bonnie Berger, Hyunghoon Cho;
+bioRxiv (2020)
+\url{doi:10.1101/2020.05.12.077776}
 }
