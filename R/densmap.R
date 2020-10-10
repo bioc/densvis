@@ -1,4 +1,5 @@
-#' Density-preserving t-SNE
+#' Density-preserving UMAP
+#' 
 #' @param x A numeric matrix or matrix-like object.
 #' @param n_components The dimension of the space to embed 
 #' into. This defaults to 2 to provide easy visualization, 
@@ -109,6 +110,12 @@
 #' target. The default of 0.5 balances the weighting equally 
 #' between data and target.
 #' @return A numeric matrix
+#' @references
+#' Density-Preserving Data Visualization Unveils Dynamic Patterns of Single-Cell 
+#' Transcriptomic Variability
+#' Ashwin Narayan, Bonnie Berger, Hyunghoon Cho;
+#' bioRxiv (2020)
+#' <doi:10.1101/2020.05.12.077776>
 #' @examples
 #' set.seed(42)
 #' x <- matrix(rnorm(2000), ncol=20) 

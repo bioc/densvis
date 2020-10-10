@@ -2,7 +2,7 @@
 % Please edit documentation in R/densmap.R
 \name{densmap}
 \alias{densmap}
-\title{Density-preserving t-SNE}
+\title{Density-preserving UMAP}
 \usage{
 densmap(
   x,
@@ -167,10 +167,17 @@ between data and target.}
 A numeric matrix
 }
 \description{
-Density-preserving t-SNE
+Density-preserving UMAP
 }
 \examples{
 set.seed(42)
 x <- matrix(rnorm(2000), ncol=20) 
 densmap(x)
+}
+\references{
+Density-Preserving Data Visualization Unveils Dynamic Patterns of Single-Cell
+Transcriptomic Variability
+Ashwin Narayan, Bonnie Berger, Hyunghoon Cho;
+bioRxiv (2020)
+\url{doi:10.1101/2020.05.12.077776}
 }
