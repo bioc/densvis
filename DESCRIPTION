@@ -18,6 +18,11 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Imports:
+    Rcpp,
+    basilisk,
+    assertthat,
+    reticulate
 Suggests: 
     knitr,
     rmarkdown,
@@ -26,8 +31,6 @@ Suggests:
     Rtsne,
     testthat
 LinkingTo:
-    Rcpp
-Imports:
     Rcpp
 biocViews: DimensionReduction, Visualization, Software, SingleCell, Sequencing
 VignetteBuilder: knitr
