@@ -1,4 +1,5 @@
 #' Density-preserving t-SNE
+#' @param x A numeric matrix or matrix-like object.
 #' @param n_components The dimension of the space to embed 
 #' into. This defaults to 2 to provide easy visualization, 
 #' but can reasonably be set to any integer value in the 
@@ -11,6 +12,9 @@
 #' @param dens_lambda numeric; the relative importance of the 
 #' density-preservation term compared to the original t-SNE 
 #' objective function.
+#' @param var_shift Regularization term added to the variance 
+#' of embedding local radius for stability (float, 
+#' non-negative); default 0.1.
 #' @param n_neighbors The size of local neighborhood 
 #' (in terms of number of neighboring sample points) used for 
 #' manifold approximation. Larger values result in more 
@@ -61,11 +65,6 @@
 #' determines the scale at which embedded points will be 
 #' spread out.
 #' @param spread The effective scale of embedded points. In combination with min_dist this determines how clustered/clumped the embedded points are.
-#' @param low_memory For some datasets the nearest neighbor 
-#' computation can consume a lot of memory. If you find that 
-#' UMAP is failing due to memory constraints consider setting 
-#' this option to True. This approach is more computationally 
-#' expensive, but avoids excessive memory use.
 #' @param set_op_mix_ratio Interpolate between (fuzzy) union 
 #' and intersection as the set operation used to combine 
 #' local fuzzy simplicial sets to obtain a global fuzzy 
@@ -109,6 +108,7 @@
 #' entirely on data, a value of 1.0 weights entirely on 
 #' target. The default of 0.5 balances the weighting equally 
 #' between data and target.
+#' @return A numeric matrix
 #' @examples
 #' set.seed(42)
 #' x <- matrix(rnorm(2000), ncol=20) 
@@ -119,10 +119,10 @@ densmap <- function(
         n_components = 2L,
         dens_frac = 0.3,
         dens_lambda = 0.1,
+        var_shift = 0.1,
         n_neighbors = 15L,
         metric = "euclidean",
         n_epochs = 750L,
-        var_shift = 0.1,
         learning_rate = 1.0,
         init = c("spectral", "random"),
         min_dist = 0.1,

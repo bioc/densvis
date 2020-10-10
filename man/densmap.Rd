@@ -6,18 +6,17 @@
 \usage{
 densmap(
   x,
-  n_components = 2,
-  dens_frac,
-  dens_lambda,
-  n_neighbors = 15,
+  n_components = 2L,
+  dens_frac = 0.3,
+  dens_lambda = 0.1,
+  var_shift = 0.1,
+  n_neighbors = 15L,
   metric = "euclidean",
   n_epochs = 750L,
-  var_shift = 0.1,
   learning_rate = 1,
   init = c("spectral", "random"),
   min_dist = 0.1,
   spread = 0.1,
-  low_memory = FALSE,
   set_op_mix_ratio = 1,
   local_connectivity = 1L,
   repulsion_strength = 1,
@@ -30,19 +29,26 @@ densmap(
 )
 }
 \arguments{
-\item{n_components}{The dimension of the space to embed
-into. This defaults to 2 to provide easy visualization, but
-can reasonably be set to any integer value in the range 2
-to 100.}
+\item{x}{A numeric matrix or matrix-like object.}
 
-\item{dens_frac}{numeric; fraction of the iterations for which the full
-objective function (including the density-preserving term) is used.
-For the first \code{1 - dens_frac} fraction of the iterations, only
+\item{n_components}{The dimension of the space to embed
+into. This defaults to 2 to provide easy visualization,
+but can reasonably be set to any integer value in the
+range 2 to 100.}
+
+\item{dens_frac}{numeric; fraction of the iterations for
+which the full objective function (including the
+density-preserving term) is used. For the first
+\code{1 - dens_frac} fraction of the iterations, only
 the original t-SNE objective function is used.}
 
-\item{dens_lambda}{numeric; the relative importanceof the
+\item{dens_lambda}{numeric; the relative importance of the
 density-preservation term compared to the original t-SNE
 objective function.}
+
+\item{var_shift}{Regularization term added to the variance
+of embedding local radius for stability (float,
+non-negative); default 0.1.}
 
 \item{n_neighbors}{The size of local neighborhood
 (in terms of number of neighboring sample points) used for
@@ -105,12 +111,6 @@ spread out.}
 
 \item{spread}{The effective scale of embedded points. In combination with min_dist this determines how clustered/clumped the embedded points are.}
 
-\item{low_memory}{For some datasets the nearest neighbor
-computation can consume a lot of memory. If you find that
-UMAP is failing due to memory constraints consider setting
-this option to True. This approach is more computationally
-expensive, but avoids excessive memory use.}
-
 \item{set_op_mix_ratio}{Interpolate between (fuzzy) union
 and intersection as the set operation used to combine
 local fuzzy simplicial sets to obtain a global fuzzy
@@ -162,6 +162,9 @@ topology and target topology. A value of 0.0 weights
 entirely on data, a value of 1.0 weights entirely on
 target. The default of 0.5 balances the weighting equally
 between data and target.}
+}
+\value{
+A numeric matrix
 }
 \description{
 Density-preserving t-SNE
