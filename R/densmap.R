@@ -57,6 +57,10 @@
 #' embedding. Valid options:
 #' - "spectral": use a spectral embedding of the fuzzy 1-skeleton
 #' - "random": assign initial embedding positions at random.
+#' @param Y_init Numeric matrix specifying the initial 
+#' locations of the objects in the embedding. If NULL, 
+#' random or spectral initialization will be used,
+#' controlled by the \code{init} argument.
 #' @param min_dist The effective minimum distance between 
 #' embedded points. Smaller values will result in a more 
 #' clustered/clumped embedding where nearby points on the 
@@ -127,13 +131,14 @@ densmap <- function(
         dens_frac = 0.3,
         dens_lambda = 0.1,
         var_shift = 0.1,
-        n_neighbors = 15L,
+        n_neighbors = 30L,
         metric = "euclidean",
         n_epochs = 750L,
         learning_rate = 1.0,
         init = c("spectral", "random"),
+        Y_init = NULL,
         min_dist = 0.1,
-        spread = 0.1,
+        spread = 1.0,
         # low_memory = FALSE,
         set_op_mix_ratio = 1.0,
         local_connectivity = 1L,
@@ -147,6 +152,15 @@ densmap <- function(
     ) {
     x <- as.matrix(x)
     init <- match.arg(init)
+    if (!is.null(Y_init)) {
+        assert_that(
+            is.matrix(Y_init),
+            is.numeric(Y_init),
+            ncol(Y_init) == n_components,
+            nrow(Y_init) == nrow(x)
+        )
+        init <- Y_init
+    }
     .checks(
         x = x,
         n_components = n_components,

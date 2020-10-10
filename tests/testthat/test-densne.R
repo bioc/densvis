@@ -1,5 +1,5 @@
 test_that("error conditions", {
-    x <- matrix(rnorm(1e4), nrow = 1000)
+    x <- matrix(rnorm(1e3), nrow = 100)
     x <- x[1:10, ]
     expect_error(densne(x), "perplexity is too large for the number of samples")
     expect_error(
@@ -49,9 +49,9 @@ test_that("error conditions", {
 })
 
 test_that("densne works", {
-    x <- matrix(rnorm(1e4), nrow = 1000)
-    expect_is(densne(x), "matrix")
-    expect_is(densne(x, num_threads = 8), "matrix")
+    x <- matrix(rnorm(1e3), nrow = 100)
+    expect_is(densne(x, perplexity = 5), "matrix")
+    expect_is(densne(x, perplexity = 5, num_threads = 8), "matrix")
     Y_init <- prcomp(x)$x[, 1:2]
-    expect_is(densne(x, Y_init = Y_init), "matrix")
+    expect_is(densne(x, perplexity = 5, Y_init = Y_init), "matrix")
 })

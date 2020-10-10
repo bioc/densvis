@@ -10,13 +10,14 @@ densmap(
   dens_frac = 0.3,
   dens_lambda = 0.1,
   var_shift = 0.1,
-  n_neighbors = 15L,
+  n_neighbors = 30L,
   metric = "euclidean",
   n_epochs = 750L,
   learning_rate = 1,
   init = c("spectral", "random"),
+  Y_init = NULL,
   min_dist = 0.1,
-  spread = 0.1,
+  spread = 1,
   set_op_mix_ratio = 1,
   local_connectivity = 1L,
   repulsion_strength = 1,
@@ -99,6 +100,11 @@ embedding. Valid options:
 \item "spectral": use a spectral embedding of the fuzzy 1-skeleton
 \item "random": assign initial embedding positions at random.
 }}
+
+\item{Y_init}{Numeric matrix specifying the initial
+locations of the objects in the embedding. If NULL,
+random or spectral initialization will be used,
+controlled by the \code{init} argument.}
 
 \item{min_dist}{The effective minimum distance between
 embedded points. Smaller values will result in a more
