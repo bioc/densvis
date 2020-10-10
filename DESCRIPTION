@@ -7,11 +7,13 @@ Authors@R:
            role = c("aut", "cre"),
            email = "alan.ocallaghan@outlook.com")
 Description: 
-  Implements the density-preserving modification to t-SNE described by
-  Narayan et al. (2020) <doi:10.1101/2020.05.12.077776>.
-  This modification includes a term which considers the local density of points
-  in the original high-dimensional space when creating the t-SNE embedding.
-  This can help to create visualisations that are more representative of
+  Implements the density-preserving modification to t-SNE 
+  and UMAP described by Narayan et al. (2020) 
+  <doi:10.1101/2020.05.12.077776>.
+  This modification includes a term which considers the local 
+  density of points in the original high-dimensional space 
+  when creating the t-SNE or UMAP embedding. This can help to 
+  create visualisations that are more representative of 
   heterogeneity in the original high-dimensional space.
 License: GPL-3
 Encoding: UTF-8
