@@ -35,8 +35,8 @@
 #' bioRxiv (2020)
 #' <doi:10.1101/2020.05.12.077776>
 #' @examples 
-#' x <- matrix(rnorm(1e4), nrow = 1000)
-#' d <- densne(x)
+#' x <- matrix(rnorm(1e3), nrow = 100)
+#' d <- densne(x, perplexity = 5)
 #' plot(d)
 #' @export
 densne <- function(

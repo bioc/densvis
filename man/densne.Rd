@@ -74,8 +74,8 @@ A numeric matrix corresponding to the t-SNE embedding
 Density-preserving t-SNE
 }
 \examples{
-x <- matrix(rnorm(1e4), nrow = 1000)
-d <- densne(x)
+x <- matrix(rnorm(1e3), nrow = 100)
+d <- densne(x, perplexity = 5)
 plot(d)
 }
 \references{

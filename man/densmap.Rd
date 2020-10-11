@@ -177,7 +177,7 @@ Density-preserving UMAP
 }
 \examples{
 set.seed(42)
-x <- matrix(rnorm(2000), ncol=20) 
+x <- matrix(rnorm(200), ncol=2)
 densmap(x)
 }
 \references{

@@ -122,7 +122,7 @@
 #' <doi:10.1101/2020.05.12.077776>
 #' @examples
 #' set.seed(42)
-#' x <- matrix(rnorm(2000), ncol=20) 
+#' x <- matrix(rnorm(200), ncol=2)
 #' densmap(x)
 #' @export
 densmap <- function(
