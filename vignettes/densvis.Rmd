@@ -31,9 +31,10 @@ library("BiocStyle")
 # Introduction
 
 Non-linear dimensionality reduction techniques such as t-SNE [@Maaten2008]
-produce a low-dimensional embedding that summarises the global structure
-of high-dimensional data. These techniques can be particularly
-useful when visualising high-dimensional data in a biological setting.
+and UMAP [@McInnes2020] produce a low-dimensional embedding that summarises 
+the global structure of high-dimensional data. These techniques can be 
+particularly useful when visualising high-dimensional data in a biological 
+setting.
 However, these embeddings may not accurately represent the local density
 of data in the original space, resulting in misleading visualisations where
 the space given to clusters of data does not represent the fraction of the
@@ -61,7 +62,7 @@ library("Rtsne")
 library("uwot")
 library("ggplot2")
 theme_set(theme_bw())
-set.seed(42)
+set.seed(14)
 ```
 
 ```{r data}
