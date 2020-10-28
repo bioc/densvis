@@ -1,12 +1,18 @@
 Package: densvis
 Title: Density-Preserving Data Visualization via Non-Linear Dimensionality Reduction
-Version: 1.0.0
+Version: 1.00.1
 Date: 2020-10-16
 Authors@R: 
-    person(given = "Alan",
-           family = "O'Callaghan",
-           role = c("aut", "cre"),
-           email = "alan.ocallaghan@outlook.com")
+  c(
+    person(
+      given = "Alan",
+      family = "O'Callaghan",
+      role = c("aut", "cre"),
+      email = "alan.ocallaghan@outlook.com"
+    ),
+    person(given = "Ashwinn", family = "Narayan", role = "aut"),
+    person(given = "Hyunghoon", family = "Cho", role = "aut")
+  )
 Description: 
   Implements the density-preserving modification to t-SNE 
   and UMAP described by Narayan et al. (2020) 
@@ -29,7 +35,7 @@ Description:
   which considers the local density of points in the original high-dimensional 
   space. This can help to create visualisations that are more representative of 
   heterogeneity in the original high-dimensional space.
-License: GPL-3
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

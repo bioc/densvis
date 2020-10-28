@@ -1,0 +1,6 @@
+bibentry(bibtype = "Article",
+  title = "Density-Preserving Data Visualization Unveils Dynamic Patterns of Single-Cell Transcriptomic Variability",
+  author = "Narayan, Ashwin and Berger, Bonnie and Cho, Hyunghoon",
+  journal = "bioRxiv",
+  year = "2020",
+  doi = "10.1101/2020.05.12.077776")
