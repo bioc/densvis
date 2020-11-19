@@ -57,19 +57,14 @@
 #ifndef DENSNE_H
 #define DENSNE_H
 
-#ifdef __cplusplus
 extern "C" {
     namespace DENSNE {
-        #endif
             void run(
                 double* X, int N, int D, double* Y, double* dens, int no_dims,
                 double perplexity, double theta, bool skip_random_init, int max_iter,
                 double momentum, double final_momentum, double eta,
                 int stop_lying_iter, int mom_switch_iter, double dens_frac,
                 double dens_lambda, bool final_dens, int num_threads, bool verbose);
-        #ifdef __cplusplus
     }
 }
-#endif
-
 #endif

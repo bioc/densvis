@@ -365,7 +365,7 @@ static void computeGradient(unsigned int* inp_row_P, unsigned int* inp_col_P, do
     double* neg_f = (double*) calloc(N * D, sizeof(double));
     if(pos_f == NULL || neg_f == NULL) { Rcpp::stop("Memory allocation failed!\n"); }
     tree->computeEdgeForces(inp_row_P, inp_col_P, inp_val_P, N, pos_f, NULL, NULL, 0);
-    #pragma omp parallel for schedule(guided)
+
     for(int n = 0; n < N; n++) {
         tree->computeNonEdgeForces(n, theta, neg_f + n * D, &sum_Q);
     }
@@ -402,7 +402,7 @@ static void computeGradientDens(unsigned int* inp_row_P, unsigned int* inp_col_P
 
     tree->computeEdgeForces(inp_row_P, inp_col_P, inp_val_P, N, pos_f,
                             re, q_norm, logdist_shift); // re and q_norm updated
-    #pragma omp parallel for schedule(guided)
+
     for (int n = 0; n < N; n++) {
       tree->computeNonEdgeForces(n, theta, neg_f + n * D, &sum_Q);
     }
