@@ -13,7 +13,7 @@
 #' @param dens_lambda numeric; the relative importance of the 
 #' density-preservation term compared to the original t-SNE 
 #' objective function.
-#' @param var_shift Regularization term added to the variance 
+#' @param dens_var_shift Regularization term added to the variance 
 #' of embedding local radius for stability (float, 
 #' non-negative); default 0.1.
 #' @param n_neighbors The size of local neighborhood 
@@ -130,7 +130,7 @@ densmap <- function(
         n_components = 2L,
         dens_frac = 0.3,
         dens_lambda = 0.1,
-        var_shift = 0.1,
+        dens_var_shift = 0.1,
         n_neighbors = 30L,
         metric = "euclidean",
         n_epochs = 750L,
@@ -169,7 +169,7 @@ densmap <- function(
         n_neighbors = n_neighbors,
         metric = metric,
         n_epochs = n_epochs,
-        var_shift = var_shift,
+        dens_var_shift = dens_var_shift,
         learning_rate = learning_rate,
         init = init,
         min_dist = min_dist,
@@ -195,7 +195,7 @@ densmap <- function(
         n_neighbors = n_neighbors,
         metric = metric,
         n_epochs = n_epochs,
-        var_shift = var_shift,
+        dens_var_shift = dens_var_shift,
         learning_rate = learning_rate,
         init = init,
         min_dist = min_dist,
@@ -217,9 +217,10 @@ densmap <- function(
 }
 
 .fit_densmap <- function(x, ...) {
-    densmap <- reticulate::import("densmap")
-    densmap$densMAP(
-        final_dens = FALSE,
+    umap <- reticulate::import("umap")
+    umap$UMAP(
+        densmap = TRUE,
+        output_dens = FALSE,
         ...
     )$fit_transform(x)
 }
@@ -230,10 +231,10 @@ densmap <- function(
         n_components,
         dens_frac,
         dens_lambda,
+        dens_var_shift,
         n_neighbors,
         metric,
         n_epochs,
-        var_shift,
         learning_rate,
         init,
         min_dist,
@@ -290,9 +291,9 @@ densmap <- function(
         is.integer(n_epochs),
         n_epochs > 0,
         length(n_epochs) == 1,
-        is.numeric(var_shift),
-        var_shift > 0,
-        length(var_shift) == 1,
+        is.numeric(dens_var_shift),
+        dens_var_shift > 0,
+        length(dens_var_shift) == 1,
         is.numeric(learning_rate),
         learning_rate > 0,
         length(learning_rate) == 1,
