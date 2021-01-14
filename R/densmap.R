@@ -1,21 +1,26 @@
-#' Density-preserving UMAP
+#' Density-preserving and other implementations of UMAP
 #' 
 #' @param x A numeric matrix or matrix-like object.
 #' @param n_components The dimension of the space to embed 
 #' into. This defaults to 2 to provide easy visualization, 
 #' but can reasonably be set to any integer value in the 
 #' range 2 to 100.
+#' @param densmap For \code{umap}, control whether the density-preserving
+#' UMAP algorithm described by Narayan et al. is used.
 #' @param dens_frac numeric; fraction of the iterations for
 #' which the full objective function (including the 
 #' density-preserving term) is used. For the first 
 #' \code{1 - dens_frac} fraction of the iterations, only
 #' the original t-SNE objective function is used.
+#' Only takes effect when \code{densmap=TRUE}.
 #' @param dens_lambda numeric; the relative importance of the 
 #' density-preservation term compared to the original t-SNE 
 #' objective function.
+#' Only takes effect when \code{densmap=TRUE}.
 #' @param dens_var_shift Regularization term added to the variance 
 #' of embedding local radius for stability (float, 
 #' non-negative); default 0.1.
+#' Only takes effect when \code{densmap=TRUE}.
 #' @param n_neighbors The size of local neighborhood 
 #' (in terms of number of neighboring sample points) used for 
 #' manifold approximation. Larger values result in more 
@@ -69,7 +74,12 @@
 #' should be set relative to the spread value, which 
 #' determines the scale at which embedded points will be 
 #' spread out.
-#' @param spread The effective scale of embedded points. In combination with min_dist this determines how clustered/clumped the embedded points are.
+#' @param spread The effective scale of embedded points. In combination with 
+#' min_dist this determines how clustered/clumped the embedded points are.
+#' @param low_memory For some datasets the nearest neighbor computation can
+#' consume a lot of memory. If you find that UMAP is failing due to memory
+#' constraints consider setting this option to True. This approach is more
+#' computationally expensive, but avoids excessive memory use.
 #' @param set_op_mix_ratio Interpolate between (fuzzy) union 
 #' and intersection as the set operation used to combine 
 #' local fuzzy simplicial sets to obtain a global fuzzy 
@@ -125,7 +135,8 @@
 #' x <- matrix(rnorm(200), ncol=2)
 #' densmap(x)
 #' @export
-densmap <- function(
+#' @rdname umap
+umap <- function(
         x,
         n_components = 2L,
         dens_frac = 0.3,
@@ -133,13 +144,14 @@ densmap <- function(
         dens_var_shift = 0.1,
         n_neighbors = 30L,
         metric = "euclidean",
+        densmap = FALSE,
         n_epochs = 750L,
         learning_rate = 1.0,
         init = c("spectral", "random"),
         Y_init = NULL,
         min_dist = 0.1,
         spread = 1.0,
-        # low_memory = FALSE,
+        low_memory = FALSE,
         set_op_mix_ratio = 1.0,
         local_connectivity = 1L,
         repulsion_strength = 1.0,
@@ -148,7 +160,8 @@ densmap <- function(
         random_state = NULL,
         angular_rp_forest = FALSE,
         target_n_neighbors = -1,
-        target_weight = 0.5
+        target_weight = 0.5,
+        disconnection_distance = NULL
     ) {
     x <- as.matrix(x)
     init <- match.arg(init)
@@ -174,7 +187,7 @@ densmap <- function(
         init = init,
         min_dist = min_dist,
         spread = spread,
-        # low_memory = low_memory,
+        low_memory = low_memory,
         set_op_mix_ratio = set_op_mix_ratio,
         local_connectivity = local_connectivity,
         repulsion_strength = repulsion_strength,
@@ -187,11 +200,12 @@ densmap <- function(
     )
     proc <- basiliskStart(python_env)
     on.exit(basiliskStop(proc))
-    out <- basiliskRun(proc, .fit_densmap,
+    out <- basiliskRun(proc, .fit_umap,
         x = x, 
         n_components = n_components,
         dens_frac = dens_frac,
         dens_lambda = dens_lambda,
+        densmap = densmap,
         n_neighbors = n_neighbors,
         metric = metric,
         n_epochs = n_epochs,
@@ -200,7 +214,7 @@ densmap <- function(
         init = init,
         min_dist = min_dist,
         spread = spread,
-        # low_memory = low_memory,
+        low_memory = low_memory,
         set_op_mix_ratio = set_op_mix_ratio,
         local_connectivity = local_connectivity,
         repulsion_strength = repulsion_strength,
@@ -210,19 +224,23 @@ densmap <- function(
         angular_rp_forest = angular_rp_forest,
         target_n_neighbors = target_n_neighbors,
         target_weight = target_weight
-
     )
     out
 
 }
 
-.fit_densmap <- function(x, ...) {
+.fit_umap <- function(x, densmap = TRUE, ...) {
     umap <- reticulate::import("umap")
     umap$UMAP(
-        densmap = TRUE,
+        densmap = densmap,
         output_dens = FALSE,
         ...
     )$fit_transform(x)
+}
+
+#' @rdname umap
+densmap <- function(...) {
+    umap(..., densmap = TRUE)
 }
 
 
