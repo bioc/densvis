@@ -30,8 +30,7 @@ umap(
   angular_rp_forest = FALSE,
   target_n_neighbors = -1,
   target_weight = 0.5,
-  disconnection_distance = NULL,
-  force_approximation_algorithm = FALSE
+  disconnection_distance = NULL
 )
 
 densmap(...)
@@ -187,6 +186,18 @@ topology and target topology. A value of 0.0 weights
 entirely on data, a value of 1.0 weights entirely on
 target. The default of 0.5 balances the weighting equally
 between data and target.}
+
+\item{disconnection_distance}{Numeric scalar.
+If specified, UMAP will disconnect any vertices of distance greater than or
+equal to disconnection_distance when approximating the manifold via our k-nn
+graph. This is particularly useful in the case that you have a bounded
+metric. The UMAP assumption that we have a connected manifold can be
+problematic when you have points that are maximally different from all the
+rest of your data. The connected manifold assumption will make such points
+have perfect similarity to a random set of other points. Too many such
+points will artificially connect your space.}
+
+\item{...}{Passed from \code{densmap} to \code{umap}.}
 }
 \value{
 A numeric matrix

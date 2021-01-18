@@ -123,6 +123,16 @@
 #' entirely on data, a value of 1.0 weights entirely on 
 #' target. The default of 0.5 balances the weighting equally 
 #' between data and target.
+#' @param disconnection_distance Numeric scalar.
+#' If specified, UMAP will disconnect any vertices of distance greater than or
+#' equal to disconnection_distance when approximating the manifold via our k-nn 
+#' graph. This is particularly useful in the case that you have a bounded 
+#' metric. The UMAP assumption that we have a connected manifold can be 
+#' problematic when you have points that are maximally different from all the 
+#' rest of your data. The connected manifold assumption will make such points 
+#' have perfect similarity to a random set of other points. Too many such 
+#' points will artificially connect your space.
+#' @param ... Passed from \code{densmap} to \code{umap}.
 #' @return A numeric matrix
 #' @references
 #' Density-Preserving Data Visualization Unveils Dynamic Patterns of Single-Cell 
@@ -135,7 +145,7 @@
 #' x <- matrix(rnorm(200), ncol=2)
 #' densmap(x)
 #' @export
-#' @rdname umap
+#' @rdname densmap
 umap <- function(
         x,
         n_components = 2L,
@@ -238,7 +248,7 @@ umap <- function(
     )$fit_transform(x)
 }
 
-#' @rdname umap
+#' @rdname densmap
 densmap <- function(...) {
     umap(..., densmap = TRUE)
 }
