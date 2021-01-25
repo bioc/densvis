@@ -249,6 +249,7 @@ umap <- function(
 }
 
 #' @rdname densmap
+#' @export
 densmap <- function(...) {
     umap(..., densmap = TRUE)
 }
