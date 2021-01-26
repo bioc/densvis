@@ -1,7 +1,7 @@
 Package: densvis
 Title: Density-Preserving Data Visualization via Non-Linear Dimensionality Reduction
-Version: 1.00.5
-Date: 2021-01-19
+Version: 1.00.6
+Date: 2021-01-26
 Authors@R: 
   c(
     person(
@@ -58,3 +58,4 @@ LinkingTo:
     Rcpp
 biocViews: DimensionReduction, Visualization, Software, SingleCell, Sequencing
 VignetteBuilder: knitr
+StagedInstall: no
