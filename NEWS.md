@@ -8,3 +8,4 @@ Version 1.2.0
 
 - Use umap-learn python library instead of densmap-learn.
   Add umap function for non density-preserving umap.
+- Add normalize argument to dens-SNE.

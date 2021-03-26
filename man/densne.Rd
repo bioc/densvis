@@ -20,7 +20,8 @@ densne(
   exaggeration_factor = 12,
   dens_frac = 0.3,
   dens_lambda = 0.1,
-  num_threads = 1
+  num_threads = 1,
+  normalize = TRUE
 )
 }
 \arguments{
@@ -66,6 +67,9 @@ the original t-SNE objective function is used.}
 density-preservation term compared to the original t-SNE objective function.}
 
 \item{num_threads}{Number of threads to be used for parallelisation.}
+
+\item{normalize}{logical; Should data be normalized internally prior to
+distance calculations with \code{\link[Rtsne]{normalize_input}}?}
 }
 \value{
 A numeric matrix corresponding to the t-SNE embedding

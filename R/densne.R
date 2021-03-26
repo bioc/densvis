@@ -27,6 +27,8 @@
 #' @param dens_lambda numeric; the relative importanceof the 
 #'  density-preservation term compared to the original t-SNE objective function.
 #' @param num_threads Number of threads to be used for parallelisation.
+#' @param normalize logical; Should data be normalized internally prior to 
+#' distance calculations with \code{\link[Rtsne]{normalize_input}}?
 #' @return A numeric matrix corresponding to the t-SNE embedding 
 #' @references
 #' Density-Preserving Data Visualization Unveils Dynamic Patterns of Single-Cell 
@@ -55,9 +57,13 @@ densne <- function(
         exaggeration_factor = 12,
         dens_frac = 0.3,
         dens_lambda = 0.1,
-        num_threads = 1
+        num_threads = 1,
+        normalize = TRUE
     ) {
     X <- t(as.matrix(X))
+    if (normalize) {
+      X <- Rtsne::normalize_input(X)
+    }
     .check_tsne_params(
         ncol(X),
         dims = dims,
