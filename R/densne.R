@@ -1,5 +1,5 @@
 #' Density-preserving t-SNE
-#' 
+#'
 #' @param X Input data matrix.
 #' @param dims Integer output dimensionality.
 #' @param perplexity Perplexity parameter (should not be bigger than 
@@ -60,10 +60,11 @@ densne <- function(
         num_threads = 1,
         normalize = TRUE
     ) {
-    X <- t(as.matrix(X))
+    X <- as.matrix(X)
     if (normalize) {
       X <- Rtsne::normalize_input(X)
     }
+    X <- t(X)
     .check_tsne_params(
         ncol(X),
         dims = dims,
