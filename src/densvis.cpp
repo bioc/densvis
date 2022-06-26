@@ -55,7 +55,7 @@ Rcpp::NumericMatrix densne_cpp(
     no_dims,
     perplexity,
     theta,
-    false,
+    init,
     max_iter,
     momentum,
     final_momentum,
