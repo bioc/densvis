@@ -89,7 +89,7 @@ densne <- function(
         theta = theta,
         verbose = verbose,
         max_iter = max_iter,
-        Y_in = matrix(),
+        Y_in = if (is.null(Y_init)) matrix() else Y_init,
         init = !is.null(Y_init),
         stop_lying_iter = stop_lying_iter,
         mom_switch_iter = mom_switch_iter,
