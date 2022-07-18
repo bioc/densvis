@@ -1,0 +1,150 @@
+---
+title: "Introduction to densvis"
+author:
+  - name: Alan O'Callaghan
+    email: alan.ocallaghan@outlook.com
+package: densvis
+output:
+  BiocStyle::html_document:
+    toc_float: yes
+    fig_width: 10
+    fig_height: 8
+bibliography: library.bib
+vignette: >
+  %\VignetteIndexEntry{Introduction to densvis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    error = FALSE,
+    warning=FALSE,
+    message=FALSE,
+    collapse = TRUE,
+    comment = "#>"
+)
+library("BiocStyle")
+```
+
+
+# Introduction
+
+Non-linear dimensionality reduction techniques such as t-SNE [@Maaten2008]
+and UMAP [@McInnes2020] produce a low-dimensional embedding that summarises 
+the global structure of high-dimensional data. These techniques can be 
+particularly useful when visualising high-dimensional data in a biological 
+setting.
+However, these embeddings may not accurately represent the local density
+of data in the original space, resulting in misleading visualisations where
+the space given to clusters of data does not represent the fraction of the
+high dimensional space that they occupy.
+`densvis` implements the density-preserving objective function described by
+[@Narayan2020] which aims to address this deficiency by including a 
+density-preserving term in the t-SNE and UMAP optimisation procedures.
+This can enable the creation of visualisations that accurately capture 
+differing degrees of transcriptional heterogeneity within different cell 
+subpopulations in scRNAseq experiments, for example.
+
+# Setting up the data
+
+We will illustrate the use of densvis
+using simulated data.
+We will first load the `densvis` and `Rtsne` libraries 
+and set a random seed to ensure the t-SNE visualisation is reproducible
+(note: it is good practice to ensure that a t-SNE embedding is robust
+by running the algorithm multiple times).
+
+
+```{r setup}
+library("densvis")
+library("Rtsne")
+library("uwot")
+library("ggplot2")
+theme_set(theme_bw())
+set.seed(14)
+```
+
+```{r data}
+data <- data.frame(
+    x = c(rnorm(1000, 5), rnorm(1000, 0, 0.2)),
+    y = c(rnorm(1000, 5), rnorm(1000, 0, 0.2)),
+    class = c(rep("Class 1", 1000), rep("Class 2", 1000))
+)
+ggplot() +
+    aes(data[, 1], data[, 2], colour = data$class) +
+    geom_point(pch = 19) +
+    scale_colour_discrete(name = "Cluster") +
+    ggtitle("Original co-ordinates")
+```
+
+# Running t-SNE
+
+Density-preserving t-SNE can be generated using the `densne`
+function. This function returns a matrix of t-SNE co-ordinates.
+We set `dens_frac` (the fraction of optimisation steps that consider
+the density preservation) and `dens_lambda` (the weight given to density
+preservation relative to the standard t-SNE objective) each to 0.5.
+
+```{r run-densne}
+fit1 <- densne(data[, 1:2], dens_frac = 0.5, dens_lambda = 0.5)
+ggplot() +
+    aes(fit1[, 1], fit1[, 2], colour = data$class) +
+    geom_point(pch = 19) +
+    scale_colour_discrete(name = "Class") +
+    ggtitle("Density-preserving t-SNE") +
+    labs(x = "t-SNE 1", y = "t-SNE 2")
+```
+
+If we run t-SNE on the same data, we can see that the density-preserving
+objective better represents the density of the data, 
+
+```{r run-tsne}
+fit2 <- Rtsne(data[, 1:2])
+ggplot() +
+    aes(fit2$Y[, 1], fit2$Y[, 2], colour = data$class) +
+    geom_point(pch = 19) +
+    scale_colour_discrete(name = "Class") +
+    ggtitle("Standard t-SNE") +
+    labs(x = "t-SNE 1", y = "t-SNE 2")
+```
+
+
+
+# Running UMAP
+
+A density-preserving UMAP embedding can be generated using the `densmap`
+function. This function returns a matrix of UMAP co-ordinates. As with t-SNE,
+we set `dens_frac` (the fraction of optimisation steps that consider
+the density preservation) and `dens_lambda` (the weight given to density
+preservation relative to the standard t-SNE objective) each to 0.5.
+
+```{r run-densmap}
+fit1 <- densmap(data[, 1:2], dens_frac = 0.5, dens_lambda = 0.5)
+ggplot() +
+    aes(fit1[, 1], fit1[, 2], colour = data$class) +
+    geom_point(pch = 19) +
+    scale_colour_discrete(name = "Class") +
+    ggtitle("Density-preserving t-SNE") +
+    labs(x = "t-SNE 1", y = "t-SNE 2")
+```
+
+If we run UMAP on the same data, we can see that the density-preserving
+objective better represents the density of the data, 
+
+```{r run-umap}
+fit2 <- umap(data[, 1:2])
+ggplot() +
+    aes(fit2[, 1], fit2[, 2], colour = data$class) +
+    geom_point(pch = 19) +
+    scale_colour_discrete(name = "Class") +
+    ggtitle("Standard t-SNE") +
+    labs(x = "t-SNE 1", y = "t-SNE 2")
+```
+
+
+# Session information {.unnumbered}
+
+```{r}
+sessionInfo()
+```
