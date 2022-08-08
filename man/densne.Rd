@@ -9,6 +9,12 @@ densne(
   dims = 2,
   perplexity = 50,
   theta = 0.5,
+  check_duplicates = TRUE,
+  pca = FALSE,
+  initial_dims = 50,
+  partial_pca = FALSE,
+  pca_center = TRUE,
+  pca_scale = FALSE,
   verbose = getOption("verbose", FALSE),
   max_iter = 1000,
   Y_init = NULL,
@@ -34,6 +40,23 @@ densne(
 
 \item{theta}{Speed/accuracy trade-off (increase for less
 accuracy), set to 0.0 for exact TSNE}
+
+\item{check_duplicates}{logical; Checks whether duplicates are present.
+It is best to make sure there are no duplicates present and set this option
+to FALSE, especially for large datasets (default: TRUE)}
+
+\item{pca}{logical; Whether an initial PCA step should be performed
+(default: FALSE).}
+
+\item{initial_dims}{integer; the number of dimensions that should be retained
+in the initial PCA step (default: 50)}
+
+\item{partial_pca}{logical; Whether truncated PCA should be used to calculate
+principal components (requires the irlba package). This is faster for large
+input matrices (default: FALSE)}
+
+\item{pca_center, pca_scale}{Controls whether to centre and scale the data
+before applying PCA. Defaults: TRUE, FALSE.}
 
 \item{verbose}{Logical; Whether progress updates should be printed}
 
