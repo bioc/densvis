@@ -83,10 +83,9 @@ densne <- function(
     if (normalize) {
       X <- Rtsne::normalize_input(X)
     }
-    X <- t(X)
     .check_tsne_params(
         X = X,
-        nsamples = ncol(X),
+        nsamples = nrow(X),
         dims = dims,
         perplexity = perplexity,
         theta = theta,
@@ -122,6 +121,7 @@ densne <- function(
         X <- prcomp(X, retx=TRUE, center = pca_center, scale. = pca_scale, rank. = initial_dims)$x
       }
     }
+    X <- t(X)
     out <- densne_cpp(
         X = X,
         no_dims = dims,
