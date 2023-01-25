@@ -31,7 +31,8 @@ densne(
 )
 }
 \arguments{
-\item{X}{Input data matrix.}
+\item{X}{Input data matrix, where rows are observations and columns are
+features.}
 
 \item{dims}{Integer output dimensionality.}
 
