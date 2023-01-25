@@ -1,6 +1,7 @@
 #' Density-preserving t-SNE
 #'
-#' @param X Input data matrix.
+#' @param X Input data matrix, where rows are observations and columns are
+#' features.
 #' @param dims Integer output dimensionality.
 #' @param perplexity Perplexity parameter (should not be bigger than 
 #'  3 * perplexity < nrow(X) - 1).
