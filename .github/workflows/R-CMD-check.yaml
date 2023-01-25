@@ -45,12 +45,18 @@ jobs:
         run: |
           brew install imagemagick
           brew install ffmpeg
+          
+      - name: Install apt deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install libavfilter-dev
 
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: rcmdcheck, optparse, magick, BiocManager
-
+      
 
       - name: Install BiocCheck
         if: runner.os == 'Linux'
