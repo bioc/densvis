@@ -45,13 +45,13 @@ Imports:
     basilisk,
     assertthat,
     reticulate,
+    Rtsne,
     irlba
 Suggests: 
     knitr,
     rmarkdown,
     BiocStyle,
     ggplot2,
-    Rtsne,
     uwot,
     testthat
 BugReports: https://github.com/Alanocallaghan/densvis/issues
