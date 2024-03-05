@@ -29,7 +29,7 @@ Rcpp::NumericMatrix densne_cpp(
   double * data=X.begin();
   
   if (verbose) {
-    Rprintf("Read the %i x %i data matrix successfully!\n", N, D);
+    Rprintf("Read the %i x %llu data matrix successfully!\n", N, D);
   }
 
   std::vector<double> Y(N * no_dims), costs(N), itercosts(static_cast<int>(std::ceil(max_iter/50.0)));
