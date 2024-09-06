@@ -210,15 +210,19 @@ umap <- function(
     )
     proc <- basiliskStart(python_env)
     on.exit(basiliskStop(proc))
+
+    if (!is.null(random_state)) {
+        random_state <- as.integer(random_state)
+    }
     out <- basiliskRun(proc, .fit_umap,
         x = x, 
-        n_components = n_components,
+        n_components = as.integer(n_components),
         dens_frac = dens_frac,
         dens_lambda = dens_lambda,
         densmap = densmap,
-        n_neighbors = n_neighbors,
+        n_neighbors = as.integer(n_neighbors),
         metric = metric,
-        n_epochs = n_epochs,
+        n_epochs = as.integer(n_epochs),
         dens_var_shift = dens_var_shift,
         learning_rate = learning_rate,
         init = init,
@@ -226,9 +230,9 @@ umap <- function(
         spread = spread,
         low_memory = low_memory,
         set_op_mix_ratio = set_op_mix_ratio,
-        local_connectivity = local_connectivity,
+        local_connectivity = as.integer(local_connectivity),
         repulsion_strength = repulsion_strength,
-        negative_sample_rate = negative_sample_rate,
+        negative_sample_rate = as.integer(negative_sample_rate),
         transform_queue_size = transform_queue_size,
         random_state = random_state,
         angular_rp_forest = angular_rp_forest,
@@ -305,7 +309,8 @@ densmap <- function(...) {
         )
     )
     assert_that(
-        is.integer(n_components),
+        # is.integer(n_components),
+        round(n_components == n_components),
         n_components > 0,
         length(n_components) == 1,
         is.numeric(dens_frac),
@@ -315,9 +320,11 @@ densmap <- function(...) {
         dens_lambda >= 0,
         dens_lambda <= 1,
         n_neighbors > 0,
-        is.integer(n_neighbors),
+        # is.integer(n_neighbors),
+        round(n_neighbors == n_neighbors),
         length(n_neighbors) == 1,
-        is.integer(n_epochs),
+        # is.integer(n_epochs),
+        round(n_epochs == n_epochs),
         n_epochs > 0,
         length(n_epochs) == 1,
         is.numeric(dens_var_shift),
@@ -335,20 +342,23 @@ densmap <- function(...) {
         is.numeric(set_op_mix_ratio),
         set_op_mix_ratio > 0,
         length(set_op_mix_ratio) == 1,
-        is.integer(local_connectivity),
+        # is.integer(local_connectivity),
+        round(local_connectivity == local_connectivity),
         local_connectivity > 0,
         length(local_connectivity) == 1,
         is.numeric(repulsion_strength),
         repulsion_strength > 0,
         length(repulsion_strength) == 1,
-        is.integer(negative_sample_rate),
+        # is.integer(negative_sample_rate),
+        round(negative_sample_rate == negative_sample_rate),
         negative_sample_rate > 0,
         length(negative_sample_rate) == 1,
         is.numeric(transform_queue_size),
         transform_queue_size > 0,
         length(transform_queue_size) == 1,
         is.null(random_state) ||
-            is.integer(random_state)
+            # is.integer(random_state)
+            round(random_state == random_state)
             & random_state > 0
             & length(random_state) == 1,
         is.logical(angular_rp_forest),
