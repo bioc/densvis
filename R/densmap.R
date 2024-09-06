@@ -310,7 +310,7 @@ densmap <- function(...) {
     )
     assert_that(
         # is.integer(n_components),
-        round(n_components == n_components),
+        round(n_components) == n_components,
         n_components > 0,
         length(n_components) == 1,
         is.numeric(dens_frac),
@@ -321,10 +321,10 @@ densmap <- function(...) {
         dens_lambda <= 1,
         n_neighbors > 0,
         # is.integer(n_neighbors),
-        round(n_neighbors == n_neighbors),
+        round(n_neighbors) == n_neighbors,
         length(n_neighbors) == 1,
         # is.integer(n_epochs),
-        round(n_epochs == n_epochs),
+        round(n_epochs) == n_epochs,
         n_epochs > 0,
         length(n_epochs) == 1,
         is.numeric(dens_var_shift),
@@ -343,14 +343,14 @@ densmap <- function(...) {
         set_op_mix_ratio > 0,
         length(set_op_mix_ratio) == 1,
         # is.integer(local_connectivity),
-        round(local_connectivity == local_connectivity),
+        round(local_connectivity) == local_connectivity,
         local_connectivity > 0,
         length(local_connectivity) == 1,
         is.numeric(repulsion_strength),
         repulsion_strength > 0,
         length(repulsion_strength) == 1,
         # is.integer(negative_sample_rate),
-        round(negative_sample_rate == negative_sample_rate),
+        round(negative_sample_rate) == negative_sample_rate,
         negative_sample_rate > 0,
         length(negative_sample_rate) == 1,
         is.numeric(transform_queue_size),
@@ -358,7 +358,7 @@ densmap <- function(...) {
         length(transform_queue_size) == 1,
         is.null(random_state) ||
             # is.integer(random_state)
-            round(random_state == random_state)
+            round(random_state) == random_state
             & random_state > 0
             & length(random_state) == 1,
         is.logical(angular_rp_forest),
