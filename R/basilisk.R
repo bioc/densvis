@@ -2,12 +2,13 @@ python_env <- BasiliskEnvironment(
     "densvis",
     pkgname = "densvis",
     packages = c(
-        "python=3.11.4",
-        "umap-learn=0.5.3",
-        "scikit-learn=1.3.0",
-        "numba=0.57.1",
-        "pynndescent=0.5.10",
-        "scipy=1.11.1",
-        "numpy=1.24.4"
+        "python=3.12.10",
+        "umap-learn=0.5.9.post2",
+        "scikit-learn=1.7.0",
+        "numba=0.61.2",
+        "pynndescent=0.5.13",
+        "scipy=1.16.0",
+        "numpy=2.2.6",
+        "llvmlite=0.44.0"
     )
 )
