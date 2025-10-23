@@ -27,10 +27,6 @@ Rcpp::NumericMatrix densne_cpp(
 
   size_t N = X.ncol(), D = X.nrow();
   double * data=X.begin();
-  
-  if (verbose) {
-    Rprintf("Read the %i x %llu data matrix successfully!\n", N, D);
-  }
 
   std::vector<double> Y(N * no_dims), costs(N), itercosts(static_cast<int>(std::ceil(max_iter/50.0)));
 
@@ -39,7 +35,7 @@ Rcpp::NumericMatrix densne_cpp(
       for (size_t i = 0; i < Y.size(); i++) Y[i] = Y_in[i];
       if (verbose) Rprintf("Using user supplied starting positions\n");
   }
-  
+
   double* dens = NULL;
   if (final_dens) {
     dens = (double*) malloc(N * 2 * sizeof(double));
