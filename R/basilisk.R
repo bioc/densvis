@@ -8,7 +8,7 @@ python_env <- BasiliskEnvironment(
         "numba~=0.62",
         "pynndescent=0.5.13",
         "scipy=1.16.0",
-        "numpy=~2.3",
+        "numpy=2.3.4",
         "llvmlite~=0.45"
     )
 )
