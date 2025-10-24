@@ -9,6 +9,6 @@ python_env <- BasiliskEnvironment(
         "pynndescent=0.5.13",
         "scipy=1.16.0",
         "numpy=2.2.6",
-        "llvmlite=0.44.0"
+        "llvmlite=0.45.0"
     )
 )
