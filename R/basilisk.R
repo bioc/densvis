@@ -5,10 +5,10 @@ python_env <- BasiliskEnvironment(
         "python=3.12.10",
         "umap-learn=0.5.9.post2",
         "scikit-learn=1.7.0",
-        "numba=0.61.2",
+        "numba=0.62.0",
         "pynndescent=0.5.13",
         "scipy=1.16.0",
-        "numpy=2.2.6",
-        "llvmlite=0.44.0"
+        "numpy=2.3.4",
+        "llvmlite=0.45.0"
     )
 )
