@@ -1,6 +1,6 @@
 Package: densvis
 Title: Density-Preserving Data Visualization via Non-Linear Dimensionality Reduction
-Version: 1.19.1
+Version: 1.21.1
 Date: 2025-11-04
 Authors@R: 
   c(
