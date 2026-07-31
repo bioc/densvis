@@ -61,3 +61,6 @@ biocViews: DimensionReduction, Visualization, Software, SingleCell, Sequencing
 VignetteBuilder: knitr
 URL: https://bioconductor.org/packages/densvis
 StagedInstall: no
+Config:
+    Bioconductor:
+        UnsupportedPlatforms: windows-devel-arm64
